@@ -1,58 +1,258 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+  <div id="tic-tac-toe">
+    <div class="span3 new_span">
+      <div class="row">
+        <h1 class="span3">Tic Tac Toe</h1>
+        <div class="span3">
+          <div class="input-prepend input-append">
+            <span class="add-on win_text">O won</span
+            ><strong id="o_win" class="win_times add-on">{{ oWinCount }}</strong
+            ><span class="add-on">time(s)</span>
+          </div>
+          <div class="input-prepend input-append">
+            <span class="add-on win_text">X won</span
+            ><strong id="x_win" class="win_times add-on">{{ xWinCount }}</strong
+            ><span class="add-on">time(s)</span>
+          </div>
+        </div>
+      </div>
+      <ul class="row" id="game">
+        <li
+          v-for="cell in cells"
+          :key="cell.pos"
+          @click="selectCell(cell)"
+          :class="cell.class"
+          class="btn span1"
+        >
+          {{ cell.text }}
+        </li>
+      </ul>
+      <div class="clr">&nbsp;</div>
+      <div class="row">
+        <a @click="restart" class="btn-success btn span3">Restart</a>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+const XCellClass = "btn-primary disable";
+const OCellClass = "btn-info disable";
 export default {
-  name: 'TicTacToe',
-  props: {
-    msg: String
-  }
-}
+  name: "TicTacToe",
+  data() {
+    return {
+      cells: [],
+      xWinCount: 0,
+      oWinCount: 0,
+      columnCount: 3,
+      selectedCount: 0,
+      get cellCount() {
+        return this.columnCount ** 2;
+      },
+    };
+  },
+  mounted() {
+    this.setColumns();
+  },
+  methods: {
+    setColumns() {
+      this.cells = [];
+      for (let pos = 1; pos <= this.cellCount; pos++) {
+        this.cells.push({
+          pos,
+          class: null,
+          text: "+",
+        });
+      }
+    },
+    selectCell(cell) {
+      if (cell.class) {
+        alert("cell already selected");
+        return;
+      }
+
+      if (this.selectedCount % 2 == 0) this.setOCell(cell);
+      else this.setXCell(cell);
+      this.selectedCount++;
+
+      if (this.selectedCount <= this.columnCount * 2 - 2) {
+        return;
+      }
+
+      this.checkRowWin(cell);
+      this.checkColumnWin(cell);
+      this.checkCrossWin(cell)
+      this.checkCrossWin(cell, false)
+
+      if (this.selectedCount == this.cellCount) {
+        return setTimeout(() => {
+          alert("tie, none win");
+          this.restart();
+        }, 200);
+      }
+    },
+    getCellIndex(rowNumber, columnNumber, columnPerRowCount) {
+      return (rowNumber - 1) * columnPerRowCount + columnNumber - 1;
+    },
+    checkRowWin(cell) {
+      for (let row = 1; row <= this.columnCount; row++) {
+        // eslint-disable-next-line no-unused-vars
+        let selectedCellInRowCount = 0;
+        for (let column = 1; column <= this.columnCount; column++) {
+          const cellIndex = this.getCellIndex(row, column, this.columnCount);
+          const currentCell = this.cells[cellIndex];
+          if (currentCell.text == cell.text) selectedCellInRowCount++;
+
+          if (selectedCellInRowCount == 0) break;
+        }
+
+        if (selectedCellInRowCount == this.columnCount) {
+          return setTimeout(() => {
+            this.determineWin(cell);
+          }, 100);
+        }
+      }
+    },
+    checkColumnWin(cell) {
+      for (let column = 1; column <= this.columnCount; column++) {
+        // eslint-disable-next-line no-unused-vars
+        let selectedCellInColumnCount = 0;
+        for (let row = 1; row <= this.columnCount; row++) {
+          const cellIndex = this.getCellIndex(row, column, this.columnCount);
+          const currentCell = this.cells[cellIndex];
+          if (currentCell.text == cell.text) selectedCellInColumnCount++;
+
+          if (selectedCellInColumnCount == 0) break;
+        }
+
+        if (selectedCellInColumnCount == this.columnCount) {
+          return setTimeout(() => {
+            this.determineWin(cell);
+          }, 100);
+        }
+      }
+    },
+    checkCrossWin(cell, toRight = true) {
+      const startPos = toRight == true ? 1 : this.columnCount;
+      const additionalLoop = toRight == true ? this.columnCount + 1 : this.columnCount - 1
+      let selectedCellInCrossCount = 0;
+      for (
+        let cellPos = startPos;
+        cellPos <= this.cellCount;
+        cellPos += additionalLoop
+      ) {
+        const currentCell = this.cells[cellPos - 1];
+        console.log("🚀 ~ file: TicTacToe.vue ~ line 143 ~ checkCrossWin ~ currentCell", currentCell)
+        
+        if (currentCell.text == cell.text) selectedCellInCrossCount++;
+
+        if (selectedCellInCrossCount == 0) break;
+      }
+        if (selectedCellInCrossCount == this.columnCount) {
+          return setTimeout(() => {
+            this.determineWin(cell);
+          }, 100);
+        }
+    },
+    determineWin(cell) {
+      alert(`${cell.text} win, start new game`);
+      this[`${cell.text.toLowerCase()}WinCount`]++;
+      this.restart();
+    },
+    setXCell(cell) {
+      cell.class = XCellClass;
+      cell.text = "X";
+    },
+    setOCell(cell) {
+      cell.class = OCellClass;
+      cell.text = "O";
+    },
+    restart() {
+      this.selectedCount = 0;
+      this.setColumns();
+    },
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+#tic-tac-toe .disable {
+  text-transform: uppercase;
+  font-size: 30px;
+  font-family: Georgia, "Times New Roman", Times, serif;
 }
-ul {
-  list-style-type: none;
+#tic-tac-toe #game li {
+  float: left;
   padding: 0;
+  list-style: none;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #fff;
+  height: 60px;
+  line-height: 60px;
+  font-size: 40px;
+  color: #ccc;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+#tic-tac-toe #game li.disable {
+  color: #fff;
 }
-a {
-  color: #42b983;
+#tic-tac-toe #game {
+  float: left;
+  padding: 0;
+  clear: both;
+}
+.new_span {
+  width: 226px;
+}
+#tic-tac-toe #reset {
+  padding: 5px 10px;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  clear: both;
+  cursor: pointer;
+  float: left;
+  text-align: center;
+  text-transform: uppercase;
+  outline: none;
+  width: 204px;
+}
+.input-prepend span.pre_text {
+  width: 55px;
+}
+.input-prepend .span1 {
+  width: 93px;
+}
+.input-prepend {
+  margin-bottom: 10px;
+}
+.clr {
+  clear: both;
+  height: 0;
+}
+#tic-tac-toe h1 {
+  text-align: center;
+  font-size: 28px;
+}
+#tic-tac-toe li::-moz-selection {
+  background: none;
+  color: #000;
+}
+#tic-tac-toe li::-webkit-selection {
+  background: none;
+  color: #000;
+}
+#tic-tac-toe {
+  width: 220px;
+  margin: 0 auto;
+}
+.input-append .win_times {
+  background: #fff;
+  width: 101px;
+}
+.input-append .win_text {
+  width: 52px;
 }
 </style>
