@@ -1,5 +1,10 @@
 # tic-tac-toe
 
+## Vue js installation
+run this script if you dont have installed vuejs in you machine. if you already have it, just skip to the `Project Setup`
+```
+npm install -g @vue/cli
+```
 ## Project setup
 ```
 npm install
@@ -8,16 +13,6 @@ npm install
 ### Compiles and hot-reloads for development
 ```
 npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
 ```
 
 ### Customize configuration
