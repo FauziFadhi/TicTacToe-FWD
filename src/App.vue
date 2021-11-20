@@ -1,6 +1,6 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png">
-  <TicTacToe msg="Welcome to Your Vue.js App"/>
+  <TicTacToe/>
 </template>
 
 <script>

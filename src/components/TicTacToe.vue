@@ -1,9 +1,13 @@
 <template>
-  <div id="tic-tac-toe">
-    <div class="span3 new_span">
-      <div class="row">
-        <h1 class="span3">Tic Tac Toe</h1>
+  <div id="tic-tac-toe" :style="ticTacToeWidth">
+    <div class="span3" :style="ticTacToeWidth">
+      <div class="row" :style="ticTacToeWidth">
+        <h1 class="span3 text-center">Tic Tac Toe</h1>
         <div class="span3">
+          <div class="input-prepend input-append">
+            <input type="number" v-model="columnCount" :disabled="gameInProgress">
+            <span class="add-on">Column</span>
+          </div>
           <div class="input-prepend input-append">
             <span class="add-on win_text">O won</span
             ><strong id="o_win" class="win_times add-on">{{ oWinCount }}</strong
@@ -47,14 +51,23 @@ export default {
       oWinCount: 0,
       columnCount: 3,
       selectedCount: 0,
+      gameInProgress: false,
       get cellCount() {
         return this.columnCount ** 2;
       },
+      get ticTacToeWidth () {
+        return `width: ${this.columnCount * 84.5}px;`;
+      } 
     };
   },
   mounted() {
     this.setColumns();
   },
+    watch: {
+      columnCount: function () {
+        this.setColumns()
+      }
+    },
   methods: {
     setColumns() {
       this.cells = [];
@@ -71,6 +84,7 @@ export default {
         alert("cell already selected");
         return;
       }
+      this.gameInProgress = true;
 
       if (this.selectedCount % 2 == 0) this.setOCell(cell);
       else this.setXCell(cell);
@@ -170,6 +184,7 @@ export default {
     },
     restart() {
       this.selectedCount = 0;
+      this.gameInProgress = false;
       this.setColumns();
     },
   },
@@ -202,9 +217,6 @@ export default {
   float: left;
   padding: 0;
   clear: both;
-}
-.new_span {
-  width: 226px;
 }
 #tic-tac-toe #reset {
   padding: 5px 10px;
@@ -245,7 +257,6 @@ export default {
   color: #000;
 }
 #tic-tac-toe {
-  width: 220px;
   margin: 0 auto;
 }
 .input-append .win_times {
